@@ -1,0 +1,88 @@
+version: '3.9'
+
+# Chemin du fichier .env — modifier uniquement cette ligne pour changer l'emplacement
+x-env-file: &env-file ./.env
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: stack-nginx
+    ports:
+      - "8082:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - frontend-net
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./api
+    container_name: stack-api
+    env_file:
+      - *env-file
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - frontend-net
+      - backend-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: stack-postgres
+    env_file:
+      - *env-file
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./api/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: stack-pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - backend-net
+    restart: unless-stopped
+
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+
+volumes:
+  pg-data:
+  pgadmin-data:
