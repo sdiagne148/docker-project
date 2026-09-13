@@ -1,0 +1,15 @@
+# Service externe : expose Nginx via un port du noeud Minikube.
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  # NodePort permet un acces depuis la machine hote.
+  type: NodePort
+  selector:
+    app: nginx
+  ports:
+  - port: 80
+    targetPort: 80
+    # Port accessible sur le noeud Kubernetes.
+    nodePort: 30080

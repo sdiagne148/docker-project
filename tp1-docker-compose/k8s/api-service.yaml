@@ -1,0 +1,12 @@
+# Service interne : rend l'API accessible par le nom DNS "api".
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+spec:
+  # Envoie le trafic vers les Pods portant ce label.
+  selector:
+    app: api
+  ports:
+    - port: 3000
+      targetPort: 3000

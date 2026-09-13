@@ -1,0 +1,14 @@
+# Service externe : expose pgAdmin via un NodePort.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin
+spec:
+  # Port accessible depuis la machine hote via Minikube.
+  type: NodePort
+  selector:
+    app: pgadmin
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30505

@@ -1,12 +1,15 @@
+# Deployment : maintient le nombre souhaite de Pods API.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-deployment
+  name: api
 spec:
   replicas: 3
+  # Le selector doit correspondre aux labels du template.
   selector:
     matchLabels:
       app: api
+  # Remplace progressivement les anciennes versions.
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -20,6 +23,7 @@ spec:
       containers:
       - name: api
         image: dserigne/api:v1
+        # Evite un telechargement si l'image existe deja sur le noeud.
         imagePullPolicy: IfNotPresent
         env:
         - name: NODE_ENV
@@ -47,12 +51,14 @@ spec:
               key: POSTGRES_PASSWORD
         ports:
         - containerPort: 3000
+        # Le Pod est pret quand l'API repond sur son endpoint de sante.
         readinessProbe:
           httpGet:
             path: /api/health
             port: 3000
           initialDelaySeconds: 5
           periodSeconds: 5
+        # Redemarre le conteneur si le port de l'API ne repond plus.
         livenessProbe:
           tcpSocket:
             port: 3000

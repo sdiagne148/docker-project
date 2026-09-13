@@ -1,0 +1,12 @@
+# Service interne : permet aux autres Pods d'appeler PostgreSQL par "postgres".
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  # Le trafic est envoye aux Pods PostgreSQL correspondants.
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432

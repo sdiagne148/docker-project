@@ -1,0 +1,18 @@
+# ConfigMap : contient le script execute a la premiere initialisation.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+data:
+  # Le fichier sera monte dans /docker-entrypoint-initdb.d/.
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(150) UNIQUE NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    INSERT INTO users (name, email) VALUES
+      ('Alice Dupont', 'alice@example.com'),
+      ('Bob Martin', 'bob@example.com')
+    ON CONFLICT (email) DO NOTHING;

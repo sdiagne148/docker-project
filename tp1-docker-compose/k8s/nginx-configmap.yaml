@@ -1,0 +1,28 @@
+# ConfigMap : stocke la configuration Nginx hors de l'image.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  # Ce fichier sera monte dans le conteneur Nginx.
+  default.conf: |
+    upstream api_upstream {
+      server api:3000;
+    }
+
+    server {
+      listen 80 default_server;
+      server_name _;
+
+      location /nginx-status {
+        stub_status on;
+      }
+
+      location / {
+        proxy_pass http://api_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+    }

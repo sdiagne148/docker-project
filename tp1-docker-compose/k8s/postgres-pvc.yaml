@@ -1,0 +1,12 @@
+# PVC : reserve un volume persistant pour PostgreSQL.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+spec:
+  # Ce mode convient a une base avec une seule instance.
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

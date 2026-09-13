@@ -1,0 +1,12 @@
+# PVC : demande un stockage persistant pour les donnees pgAdmin.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgadmin-data
+spec:
+  # Un seul noeud peut monter ce volume en lecture/ecriture.
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
